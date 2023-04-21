@@ -49,22 +49,10 @@ app.get('/foodlist', function (req, res) {
 
 app.post('/itemSubmit', function (req, res) {
     // Extract the data from the request body
-
     const item = req.body
 
-    if (!item) {
-        return res.status(400).send({ error: true, message: 'Please provide item information' });
-    }
-
-<<<<<<< Updated upstream
-    connection.query("INSERT INTO foodlist SET ? ", item, function (error, results) {
-        if (error) throw error;
-        // return res.send({ error: false, data: results.affectedRows, message: 'New student has been created successfully.' });
-        return
-    });
-=======
     // Use try catch to prevent app from crashing on inccorect input
-connection.query('INSERT INTO foodlist SET ?', item, function (error, results) {
+    connection.query('INSERT INTO foodlist SET ?', item, function (error, results) {
     if (error) {
         console.error(error);
         return res.status(500).send({
@@ -80,7 +68,6 @@ connection.query('INSERT INTO foodlist SET ?', item, function (error, results) {
     });
 });
 
->>>>>>> Stashed changes
 });
 
 // http://localhost:3030/foodDetail?id=1
@@ -93,10 +80,13 @@ app.get('/foodDetail', function (req, res) {
     where id = ${id};
     `;
 
-    connection.query(query, function (err, rows, fields) {
-        if (err) {
-            console.error('Error querying database: ' + err.stack);
-            return res.status(500).send('Error querying database');
+    connection.query(query, function (error, rows, fields) {
+        if (error) {
+            console.error(error);
+            return res.status(500).send({
+                error: true,
+                message: 'Internal server error',
+            });
         }
         res.json(rows[0]);
     });
@@ -121,6 +111,8 @@ app.put('/itemUpdate', function (req, res) {
 });
 
 app.delete('/itemDelete', function (req, res) {
+
+    console.log(req.query)
     const id = req.query.id;
 
     // if (!student_id) {
