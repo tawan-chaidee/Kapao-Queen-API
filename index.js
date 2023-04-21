@@ -55,7 +55,8 @@ app.post('/submit', function (req, res) {
 
     connection.query("INSERT INTO foodlist SET ? ", item, function (error, results) {
         if (error) throw error;
-        return res.send({ error: false, data: results.affectedRows, message: 'New student has been created successfully.' });
+        // return res.send({ error: false, data: results.affectedRows, message: 'New student has been created successfully.' });
+        return
     });
 
 
