@@ -10,13 +10,15 @@ dotenv.config();
 app.use(router);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 
 // CORS middleware
-app.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
 });
 
 // MySQL connection setup
@@ -34,9 +36,9 @@ connection.connect(function (err) {
     console.log(`Connected DB: ${process.env.MYSQL_DATABASE}`);
 });
 
-app.get('/foodlist', function(req, res) {
+app.get('/foodlist', function (req, res) {
     const query = 'SELECT * FROM foodlist';
-    connection.query(query, function(err, rows, fields) {
+    connection.query(query, function (err, rows, fields) {
         if (err) {
             console.error('Error querying database: ' + err.stack);
             return res.status(500).send('Error querying database');
@@ -45,8 +47,8 @@ app.get('/foodlist', function(req, res) {
     });
 });
 
-app.post('/submit', function (req, res) {
-  // Extract the data from the request body
+app.post('/itemSubmit', function (req, res) {
+    // Extract the data from the request body
 
     const item = req.body
 
@@ -54,15 +56,35 @@ app.post('/submit', function (req, res) {
         return res.status(400).send({ error: true, message: 'Please provide item information' });
     }
 
+<<<<<<< Updated upstream
     connection.query("INSERT INTO foodlist SET ? ", item, function (error, results) {
         if (error) throw error;
         // return res.send({ error: false, data: results.affectedRows, message: 'New student has been created successfully.' });
         return
     });
+=======
+    // Use try catch to prevent app from crashing on inccorect input
+connection.query('INSERT INTO foodlist SET ?', item, function (error, results) {
+    if (error) {
+        console.error(error);
+        return res.status(500).send({
+            error: true,
+            message: 'Internal server error',
+        });
+    }
+
+    return res.send({
+        error: false,
+        data: results.affectedRows,
+        message: 'New item has been created successfully.',
+    });
+});
+
+>>>>>>> Stashed changes
 });
 
 // http://localhost:3030/foodDetail?id=1
-app.get('/foodDetail', function(req, res) {
+app.get('/foodDetail', function (req, res) {
 
     const id = req.query.id;
     const query = `
@@ -71,7 +93,7 @@ app.get('/foodDetail', function(req, res) {
     where id = ${id};
     `;
 
-    connection.query(query, function(err, rows, fields) {
+    connection.query(query, function (err, rows, fields) {
         if (err) {
             console.error('Error querying database: ' + err.stack);
             return res.status(500).send('Error querying database');
@@ -83,20 +105,33 @@ app.get('/foodDetail', function(req, res) {
 app.use('/user', require('./routes/user'));
 
 
+app.put('/itemUpdate', function (req, res) {
 
+    console.log(req.body)
+    let id = req.body.id
+    let item = req.body;
 
-// // API endpoint to fetch data from MySQL
-// app.get('/special', function(req, res) {
-//     const query = 'SELECT * FROM special_item';
-//     connection.query(query, function(err, rows, fields) {
-//         if (err) {
-//             console.error('Error querying database: ' + err.stack);
-//             return res.status(500).send('Error querying database');
-//         }
-//         res.json(rows);
-//     });
-// });
+    connection.query("UPDATE foodlist SET ? WHERE id = ?", [item, id], function (error,
+        results) {
+        if (error) throw error;
+        return res.send({
+            error: false, data: results.affectedRows, message: 'item has been updated successfully.'
+        })
+    });
+});
 
+app.delete('/itemDelete', function (req, res) {
+    const id = req.query.id;
+
+    // if (!student_id) {
+    //     return res.status(400).send({ error: true, message: 'Please provide student_id' });
+    // }
+
+    connection.query('DELETE FROM foodlist WHERE id = ?', [id], function (error, results) {
+        if (error) throw error;
+        return res.send({ error: false, data: results.affectedRows, message: 'item has been deleted successfully.' });
+    });
+});
 
 // Server listening
 app.listen(process.env.PORT, function () {
