@@ -4,6 +4,7 @@ const router = express.Router();
 const mysql = require('mysql2');
 const dotenv = require("dotenv");
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(router);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cookieParser())
 
 
 // CORS middleware
