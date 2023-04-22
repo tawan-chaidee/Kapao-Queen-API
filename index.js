@@ -41,11 +41,48 @@ app.get('/foodlist', function (req, res) {
     connection.query(query, function (err, rows, fields) {
         if (err) {
             console.error('Error querying database: ' + err.stack);
-            return res.status(500).send('Error querying database');
+            return res.status(500).send('Internal server error');
         }
         res.json(rows);
     });
 });
+
+app.get('/itemSearch', function (req,res){
+    let type = req.query.type;
+    let query = req.query.query;
+
+
+    let sql
+    if (type === 'tag') {
+        sql = `
+        select *
+        from foodlist
+        where tag1 like '%${query}%'
+        or tag2 like '%${query}%'
+        `
+    } else {
+        sql = `
+        select *
+        from foodlist
+        where ${type} like '%${query}%';
+        `;
+    }
+
+
+    // if (!foodID) {
+    //     return res.status(400).send({ error: true, message: 'Please provide Food id.' });
+    //     }
+    connection.query(sql, function (error, results) {
+        if (error) {
+            console.error(error);
+            return res.status(500).send({
+                error: true,
+                message: 'Internal server error',
+            });
+        }
+        res.json(results);
+    })
+})
 
 app.post('/itemSubmit', function (req, res) {
     // Extract the data from the request body
@@ -57,10 +94,9 @@ app.post('/itemSubmit', function (req, res) {
         console.error(error);
         return res.status(500).send({
             error: true,
-            message: 'Internal server error',
+            message: 'Invalid Input',
         });
     }
-
     return res.send({
         error: false,
         data: results.affectedRows,
@@ -101,12 +137,20 @@ app.put('/itemUpdate', function (req, res) {
     let id = req.body.id
     let item = req.body;
 
-    connection.query("UPDATE foodlist SET ? WHERE id = ?", [item, id], function (error,
-        results) {
-        if (error) throw error;
+    connection.query("UPDATE foodlist SET ? WHERE id = ?", [item, id], function (error,results) {
+        if (error) {
+            console.error(error);
+            return res.status(500).send({
+                error: true,
+                message: 'Invalid Input',
+            });
+        }
+    
         return res.send({
-            error: false, data: results.affectedRows, message: 'item has been updated successfully.'
-        })
+            error: false,
+            data: results.affectedRows,
+            message: 'New item has been created successfully.',
+        });
     });
 });
 
@@ -120,10 +164,19 @@ app.delete('/itemDelete', function (req, res) {
     // }
 
     connection.query('DELETE FROM foodlist WHERE id = ?', [id], function (error, results) {
-        if (error) throw error;
+        if (error) {
+            console.error(error);
+            return res.status(500).send({
+                error: true,
+                message: 'Invalid Input',
+            });
+        }
         return res.send({ error: false, data: results.affectedRows, message: 'item has been deleted successfully.' });
     });
 });
+
+
+
 
 // Server listening
 app.listen(process.env.PORT, function () {
