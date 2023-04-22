@@ -94,7 +94,7 @@ app.get('/foodDetail', function (req, res) {
     });
 });
 
-app.use('/user', require('./routes/user'));
+app.use('/user', require('./routes/user').router);
 
 
 app.put('/itemUpdate', function (req, res) {

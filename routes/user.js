@@ -1,11 +1,12 @@
 const express = require('express');
-const connection = require("../db").promise();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const connection = require("../db").promise();
 const router = express.Router();
 
 const saltRound = 10;
+const jwtExpiredIn = '1h';
 
 router.get('/', (req, res) => {
   res.send("Hello user!")
@@ -57,14 +58,13 @@ router.post('/login', async (req, res) => {
     }
 
     // Check if password is correct
-    // res.send(result)
     let hash = result[0].password
     let match = await bcrypt.compare(password, hash)
 
     if (match) {
       let token = jwt.sign({
         username, is_admin: result[0].is_admin
-      }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      }, process.env.JWT_SECRET, { expiresIn: jwtExpiredIn });
 
       res.cookie('token',token).send({
         message: "Login successful",
@@ -84,7 +84,7 @@ router.post('/login', async (req, res) => {
   }
 })
 
-router.post('/access', (req, res) => {
+function authorizer(req, res, next) {
   // Extract the token from cookies, body or headers
   let {token} = req.cookies
   token = token || req.body.token || req.headers.authorization.split(" ")[1]
@@ -105,11 +105,18 @@ router.post('/access', (req, res) => {
       message: "Invalid token"
     })
   }
-  
-  console.log(decoded)
 
-  // console.log(token)
-  
+  req.auth = decoded
+  console.log(decoded)
+  next()
+
+}
+
+router.post('/access', authorizer, (req, res, next) => {
+  res.send({
+    message: "You have access to this page"
+  })
+  // console.log(decoded)
 })
 
-module.exports = router;
+module.exports = {router,authorizer};
