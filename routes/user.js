@@ -42,8 +42,10 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   let {username, password} = req.body
+  console.log(req.body)
   if (!username || !password) {
-    res.status(400).send({
+    return res.status(400).send({
+      success: false,
       message: "Please enter both username and password"
     })
   }
@@ -52,7 +54,8 @@ router.post('/login', async (req, res) => {
     // get the user
     let [result,_] = await connection.query("SELECT * FROM users WHERE username = ?", [username])
     if (result.length == 0) {
-      res.status(400).send({
+      return res.status(400).send({
+        success: false,
         message: "Invalid username or password"
       })
     }
@@ -66,18 +69,21 @@ router.post('/login', async (req, res) => {
         username, is_admin: result[0].is_admin
       }, process.env.JWT_SECRET, { expiresIn: jwtExpiredIn });
 
-      res.cookie('token',token).send({
+      return res.cookie('token',token,{overwrite:true}).send({
+        success: true,
         message: "Login successful",
         token
       })
     } else {
-      res.status(400).send({
+      return res.status(400).send({
+        success: false,
         message: "Invalid username or password"
       })
     }
   } catch (e) {
     console.log(e)
     res.status(500).send({
+      success: false,
       message: "Internal server error",
       error: e
     })
@@ -87,11 +93,12 @@ router.post('/login', async (req, res) => {
 function authorizer(req, res, next) {
   // Extract the token from cookies, body or headers
   let {token} = req.cookies
-  token = token || req.body.token || req.headers.authorization.split(" ")[1]
+  console.log(req.cookies)
+  token = token || req.body.token || req.headers.authorization?.split(" ")[1]
 
   // Check if token is provided
   if (!token) {
-    res.status(401).send({
+    return res.status(401).send({
       message: "Please login or attach token"
     })
   }
@@ -112,7 +119,7 @@ function authorizer(req, res, next) {
 
 }
 
-router.post('/access', authorizer, (req, res, next) => {
+router.use('/access', authorizer, (req, res, next) => {
   res.send({
     message: "You have access to this page"
   })
