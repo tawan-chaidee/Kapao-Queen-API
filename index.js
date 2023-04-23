@@ -44,7 +44,7 @@ app.get('/foodlist', function (req, res) {
 
 app.get('/itemSearch', function (req,res){
     let type = req.query.type;
-    let query = req.query.query;
+    let search = req.query.search;
 
 
     let sql
@@ -52,14 +52,14 @@ app.get('/itemSearch', function (req,res){
         sql = `
         select *
         from foodlist
-        where tag1 like '%${query}%'
-        or tag2 like '%${query}%'
+        where tag1 like '%${search}%'
+        or tag2 like '%${search}%'
         `
     } else {
         sql = `
         select *
         from foodlist
-        where ${type} like '%${query}%';
+        where ${type} like '%${search}%';
         `;
     }
 
@@ -102,7 +102,7 @@ app.post('/itemSubmit', function (req, res) {
 });
 
 // http://localhost:3030/foodDetail?id=1
-app.get('/foodDetail', function (req, res) {
+app.get('/itemDetail', function (req, res) {
 
     const id = req.query.id;
     const query = `
