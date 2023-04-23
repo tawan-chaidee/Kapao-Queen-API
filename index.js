@@ -4,6 +4,7 @@ const router = express.Router();
 const mysql = require('mysql2');
 const dotenv = require("dotenv");
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
@@ -11,23 +12,17 @@ app.use(router);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cookieParser())
 
 
 // CORS middleware
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
-
-// MySQL connection setup
-// var connection = mysql.createConnection({
-//     host: process.env.MYSQL_HOST,
-//     user: process.env.MYSQL_USERNAME,
-//     password: process.env.MYSQL_PASSWORD,
-//     database: process.env.MYSQL_DATABASE
-// });
 
 var connection = require("./db");
 
@@ -128,7 +123,7 @@ app.get('/foodDetail', function (req, res) {
     });
 });
 
-app.use('/user', require('./routes/user'));
+app.use('/user', require('./routes/user').router);
 
 
 app.put('/itemUpdate', function (req, res) {

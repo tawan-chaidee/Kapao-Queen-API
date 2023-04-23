@@ -5,7 +5,7 @@ CREATE DATABASE IF NOT EXISTS `kapao_queen` DEFAULT CHARACTER SET utf8 COLLATE u
 
 USE `kapao_queen`;
 
-DROP TABLE foodlist;
+DROP TABLE IF EXISTS foodlist;
 CREATE TABLE `foodlist` (
   `id` smallint(8)  NOT NULL,
   `name` varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, 
@@ -27,12 +27,27 @@ CREATE TABLE `foodlist` (
   `type` varchar(12)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS users;
 CREATE TABLE `kapao_queen`.`users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(50) NOT NULL,
   `password` VARCHAR(100) NOT NULL,
+  `is_admin` TINYINT NOT NULL DEFAULT 0,
+  `fname` VARCHAR(50),
+  `lname` VARCHAR(50),
+  `email` VARCHAR(50),
+  `address` VARCHAR(100),
   PRIMARY KEY (`id`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
+  
+DROP TABLE IF EXISTS login_log;
+CREATE TABLE `kapao_queen`.`login_log` (
+  `user_id` INT NOT NULL,
+  `login_date` DATETIME NULL,
+  `is_revoked` TINYINT(1) NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `kapao_queen`.`users`(id)
+);
 
  INSERT INTO `foodlist` (`id`,`name`, `browse_description`, `thai_name`, `tag1`, `tag2`, `description`,`price`,`img`,`background`,`ingredient_1`, `ingredient_2`, `ingredient_3`,`type`) VALUES
 (
