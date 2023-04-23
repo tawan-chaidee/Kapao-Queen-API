@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 
 router.post('/register', async (req, res) => {
   // Extract the data from the request body
-  let {username, password} = req.body
+  let {username, password, fname, lname, email, address} = req.body
   if (!username || !password) {
     res.status(400).send({
       message: "Please enter both username and password"
@@ -27,13 +27,21 @@ router.post('/register', async (req, res) => {
 
   try {
     // Insert user into database
-    let result = await connection.query("INSERT INTO users SET ?", {username, password: hash})
+    let result = await connection.query("INSERT INTO users SET ?", {username, password: hash,fname, lname, email, address})
     res.send({
+      success: true,
       message: "User created successfully",
     })
   } catch (e) {
     console.log(e)
+    if (e.code == "ER_DUP_ENTRY") {
+      return res.status(400).send({
+        success: false,
+        message: "Username already exists"
+      })
+    }
     res.status(500).send({
+      success: false,
       message: "Internal server error",
       error: e
     })
