@@ -46,7 +46,6 @@ app.get('/itemSearch', function (req,res){
     let type = req.query.type;
     let search = req.query.search;
 
-
     let sql
     if (type === 'tag') {
         sql = `
@@ -63,10 +62,33 @@ app.get('/itemSearch', function (req,res){
         `;
     }
 
+    connection.query(sql, function (error, results) {
+        if (error) {
+            console.error(error);
+            return res.status(500).send({
+                error: true,
+                message: 'Internal server error',
+            });
+        }
+        res.json(results);
+    })
+})
 
-    // if (!foodID) {
-    //     return res.status(400).send({ error: true, message: 'Please provide Food id.' });
-    //     }
+app.get('/itemAdvanceSearch', function (req,res){
+    let id = req.query.id;
+    let name = req.query.name;
+    let tag = req.query.tag;
+
+    let sql = `
+    select *
+    from foodlist
+    where id like '%${id}%'
+    or tag1 like '%${tag}%' 
+    or tag2 like '%${tag}%'
+    or name like '%${name}%';
+    `
+
+
     connection.query(sql, function (error, results) {
         if (error) {
             console.error(error);
@@ -110,7 +132,6 @@ app.get('/itemDetail', function (req, res) {
     from foodlist
     where id = ${id};
     `;
-
     connection.query(query, function (error, rows, fields) {
         if (error) {
             console.error(error);
