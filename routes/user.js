@@ -61,18 +61,19 @@ router.post('/login', async (req, res) => {
     }
 
     // Check if password is correct
-    let hash = result[0].password
+    let { password: hash, id, ...userData } = result[0]
     let match = await bcrypt.compare(password, hash)
 
     if (match) {
       let token = jwt.sign({
-        username, is_admin: result[0].is_admin
+        id, username, is_admin: result[0].is_admin
       }, process.env.JWT_SECRET, { expiresIn: jwtExpiredIn });
 
       return res.cookie('token',token,{overwrite:true}).send({
         success: true,
         message: "Login successful",
-        token
+        token,
+        id
       })
     } else {
       return res.status(400).send({
@@ -86,6 +87,30 @@ router.post('/login', async (req, res) => {
       success: false,
       message: "Internal server error",
       error: e
+    })
+  }
+})
+
+router.get('/:id',authorizer, async (req, res) => {
+  if (req.auth.id != req.params.id && !req.auth.is_admin) {
+    return res.status(401).send({
+      success: false,
+      message: "You are not authorized to view this page"
+    })
+  }
+
+  let [result,_] = await connection.query("SELECT * FROM users WHERE id = ?", [req.params.id])
+  if (result.length == 0) {
+    return res.status(404).send({
+      success: false,
+      message: "User not found"
+    })
+  } else {
+    let { password, ...userData } = result[0]
+    return res.send({
+      success: true,
+      message: "User found",
+      user: userData
     })
   }
 })
