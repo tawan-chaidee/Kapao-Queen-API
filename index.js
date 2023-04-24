@@ -38,7 +38,11 @@ app.get('/foodlist', function (req, res) {
             console.error('Error querying database: ' + err.stack);
             return res.status(500).send('Internal server error');
         }
-        res.json(rows);
+
+        res.status(200).json({
+            success: true,
+            result: rows
+        });
     });
 });
 
@@ -132,7 +136,7 @@ app.get('/itemDetail', function (req, res) {
     from foodlist
     where id = ${id};
     `;
-    connection.query(query, function (error, rows, fields) {
+    connection.query(query, async function (error, rows, fields) {
         if (error) {
             console.error(error);
             return res.status(500).send({
@@ -140,7 +144,21 @@ app.get('/itemDetail', function (req, res) {
                 message: 'Internal server error',
             });
         }
-        res.json(rows[0]);
+
+        // replace taglist
+        let splittedTags = rows[0].taglist.split(',');
+        rows[0].taglist = splittedTags;
+
+        // get ingredients
+        let [ingredients,_] = await connection.promise().query(`SELECT name, img from food_ingredients fi left join ingredients i on fi.ingredient_id = i.id where fi.food_id = ${id}`)
+
+        res.json({
+            success: true,
+            result: {
+                ...rows[0],
+                ingredients
+            }
+        });
     });
 });
 
@@ -167,6 +185,20 @@ app.put('/itemUpdate', function (req, res) {
             data: results.affectedRows,
             message: 'New item has been created successfully.',
         });
+    });
+});
+
+app.get('/ingredientList', function (req, res) {
+    const query = 'SELECT * FROM ingredients';
+    connection.query(query, function (err, rows, fields) {
+        if (err) {
+            console.error('Error querying database: ' + err.stack);
+            return res.status(500).send('Internal server error');
+        }
+        res.send({
+            success: true,
+            result: rows
+        })
     });
 });
 

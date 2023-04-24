@@ -132,6 +132,7 @@ function authorizer(req, res, next) {
   // Check if token is provided
   if (!token) {
     return res.status(401).send({
+      success: false,
       message: "Please login or attach token"
     })
   }
@@ -142,6 +143,7 @@ function authorizer(req, res, next) {
     decoded = jwt.verify(token, process.env.JWT_SECRET)
   } catch (e) {
     return res.status(401).send({
+      success: false,
       message: "Invalid token"
     })
   }
