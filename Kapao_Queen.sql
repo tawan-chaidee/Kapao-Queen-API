@@ -51,7 +51,7 @@ INSERT INTO `foodlist` VALUES (
 'https://food.fnr.sndimg.com/content/dam/images/food/fullset/2017/11/10/0/DV2709H_Kaosoi_s4x3.jpg.rend.hgtvcom.616.462.suffix/1510328620514.jpeg',
 'food'
 ),
-('5', 'Nutty Himaphan Cake', 'เค้กหิมพานต์', 'Himaphan Cake', 'Nutty, smooth Himaphan Cake.'
+('5', 'Nutty Himaphan Cake', 'เค้กหิมพานต์', 'Himaphan Cake', 'Nutty, smooth Himaphan Cake.',
  'As you take your first bite, you are immediately hit with the sweetness of the cake, followed by a subtle nuttiness that comes from the acorn flour used in the batter. 
  The texture is dense and moist, with a slight crumb that adds to the overall rustic feel of the cake. 
  As you continue to eat, you notice a variety of different flavors and textures that are all perfectly balanced. 
